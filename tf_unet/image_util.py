@@ -87,21 +87,27 @@ class BaseDataProvider(object):
         nyh=data.shape[2]
         nzh=data.shape[3]
 
+        # print('nxh',nxh)	
+        # print('nc',nc)	
+        # print('nyh',nyh)	
+        # print('nzh',nzh)	
+        # print('size of data ', data.shape)
+        # print('label ', label)
         Xsp=np.float32(data.transpose(1,2,3,0).reshape(1,nxh,nyh,nzh,nc))
-        Ysp=np.float32(label.transpose(1,2,3,0).reshape(1,nxh,nyh,nzh,nc))
+        Ysp=np.zeros((2),np.float32)
+        Ysp[label]=1
+        
+        # print('size of Xsp', Xsp.shape)
 
         if self.test==False:
             if np.random.rand(1)>0.5:
                 Xsp=Xsp[:,::-1,:,:,:]
-                Ysp=Ysp[:,::-1,:,:,:]
             if np.random.rand(1)>0.5:
                 Xsp=Xsp[:,:,::-1,:,:]
-                Ysp=Ysp[:,:,::-1,:,:]
             if np.random.rand(1)>0.5:
                 Xsp=Xsp[:,:,:,::-1,:]
-                Ysp=Ysp[:,:,:,::-1,:]
 
-        return Xsp,Ysp
+        return Xsp,Ysp.reshape((1,2))
 
 class ImageDataProvider(BaseDataProvider):
     """
@@ -266,4 +272,4 @@ class ImageDataProvider_hdf5_vol(BaseDataProvider):
 
         data= self._load_file(image_name, 'data')
         label = self._load_file(image_name, 'label')
-        return data,label
+        return np.expand_dims(data,0),np.expand_dims(label,0)

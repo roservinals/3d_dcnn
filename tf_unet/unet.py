@@ -179,7 +179,7 @@ class Unet(object):
         self.size_mask=size_mask
 
         self.x = tf.placeholder("float32", shape=[None, size_mask[0],size_mask[1], size_mask[2], channels])
-        self.y = tf.placeholder("float32", shape=[None, size_mask[0],size_mask[1], size_mask[2], n_class])
+        self.y = tf.placeholder("float32", shape=[None, n_class])#size_mask[0],size_mask[1], size_mask[2], n_class])
         self.keep_prob = tf.placeholder(tf.float32) #dropout (keep probability)
 
         print("channels",channels)
@@ -238,8 +238,8 @@ class Unet(object):
                     loss = tf.reduce_mean(weighted_loss)
 
                 else:
-                    loss = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(flat_logits,
-                                                                                  flat_labels))
+                    loss = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(logits=flat_logits,
+                                                                                  labels=flat_labels))
 
             elif cost_name == "psnr":
                 loss = -psnr_loss(flat_logits,flat_labels)

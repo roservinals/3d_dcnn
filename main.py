@@ -39,8 +39,8 @@ flags.DEFINE_string('optimizer','adam','optimizing algorithm : adam / momentum')
 flags.DEFINE_float('lr',1e-4,'learning rate')
 flags.DEFINE_boolean('restore',True,'resotre model')
 flags.DEFINE_string('output_path','logs/unet3d/wdec/','log folder')
-flags.DEFINE_string('data_path','/Volumes/Disk_addition/mr_data/mr_data/3d_wdec/*.h5','log folder')
-flags.DEFINE_string('test_path','/Volumes/Disk_addition/mr_data/mr_data/3d_wdec/test/*.h5','log folder')
+flags.DEFINE_string('data_path','/Users/roservinals/Documents/EPFL/1B/DeepCNN/code/3D/3d/train/*.h5','log folder')
+flags.DEFINE_string('test_path','/Users/roservinals/Documents/EPFL/1B/DeepCNN/code/3D/3d/test/*.h5','log folder')
 flags.DEFINE_boolean('is_training',True,'training phase/ deploying phase')
 conf=flags.FLAGS
 
