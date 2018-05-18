@@ -1,2 +1,4 @@
 *.mat
 logs/
+
+\.DS_Store

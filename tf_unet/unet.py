@@ -304,8 +304,9 @@ class Unet(object):
 
             # Restore model weights from previously saved model
             self.restore(sess, model_path)
-
-            y_dummy = np.empty((x_test.shape[0], x_test.shape[1], x_test.shape[2],x_test.shape[3], self.n_class))
+            y_dummy = np.empty((x_test.shape[0], x_test.shape[1], x_test.shape[2],x_test.shape[3], self.n_class))#self.n_class
+            print(np.shape(x_test))
+            print(np.shape(y_dummy))
             prediction = sess.run(self.predicter, feed_dict={self.x: x_test, self.y: y_dummy, self.keep_prob: 1.})
 
         return prediction

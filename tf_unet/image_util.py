@@ -244,6 +244,7 @@ class ImageDataProvider_hdf5_vol(BaseDataProvider):
         print("Number of files used: %s" % len(self.data_files))
 
         if self.test:
+            #self.ids=range(0,len(self.data_files))
             self.ids=range(0,len(self.data_files))
         else:
             self.ids=np.random.permutation(len(self.data_files))
