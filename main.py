@@ -60,6 +60,16 @@ if __name__ =='__main__':
 
     else:
         save_path = os.path.join(conf.output_path, "model.cpkt")
-        x_test, y_test = data_provider_test(1)
-        prediction = net.predict(save_path, x_test)
-        print("Testing avg RSNR: {:.2f}".format(layers.rsnr(prediction, y_test)))
+        acc=0.0
+        Ntest=364
+        for i in np.arange(Ntest):
+            print(repr(i)+"/"+repr(Ntest))
+            x_test, y_test = data_provider_test(1)
+            prediction = net.predict(save_path, x_test)
+            print(prediction)
+            tmp_flag=np.where(prediction==np.amax(prediction),1,0)
+            acc += np.float(np.sum(tmp_flag*y_test))
+
+
+        #print("Prediction avg class: ",(prediction))
+        print("Testing avg class: ",(acc/Ntest))

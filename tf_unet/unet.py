@@ -284,8 +284,8 @@ class Unet(object):
 
         #y_dummy = np.empty((x_test.shape[0], x_test.shape[1], x_test.shape[2],x_test.shape[3], self.n_class))
         prediction = sess.run(self.predicter, feed_dict={self.x: x_test, self.y: y_dummy, self.keep_prob: 1.})
-
-        return prediction
+        out=sess.run(tf.nn.softmax(prediction))
+        return out
 
 
     def predict(self, model_path, x_test):
@@ -304,12 +304,14 @@ class Unet(object):
 
             # Restore model weights from previously saved model
             self.restore(sess, model_path)
-            y_dummy = np.empty((x_test.shape[0], x_test.shape[1], x_test.shape[2],x_test.shape[3], self.n_class))#self.n_class
+            y_dummy = np.empty((1, self.n_class))#self.n_class
             print(np.shape(x_test))
             print(np.shape(y_dummy))
             prediction = sess.run(self.predicter, feed_dict={self.x: x_test, self.y: y_dummy, self.keep_prob: 1.})
 
-        return prediction
+            flat_logits = tf.reshape(prediction, [-1, self.n_class])
+            out=sess.run(tf.nn.softmax(flat_logits))
+        return out
 
     def save(self, sess, model_path):
         """
@@ -477,10 +479,10 @@ class Trainer(object):
 
                     norm_gradients = [np.linalg.norm(gradient) for gradient in avg_gradients]
                     self.norm_gradients_node.assign(norm_gradients).eval()
-
-                    #if step % display_step == 0:
-                        #self.output_minibatch_stats(sess, summary_writer, step, batch_x, batch_y)
-                        #self.output_minibatch_stats(sess, summary_writer, step, batch_x, util.crop_to_shape(batch_y, pred_shape))
+                    ################# PLOTS ################
+                    if step % display_step == 0:
+                        self.output_minibatch_stats(sess, summary_writer, step, batch_x, batch_y)
+                        self.output_minibatch_stats(sess, summary_writer, step, batch_x, util.crop_to_shape(batch_y, pred_shape))
 
                     total_loss += loss
 
