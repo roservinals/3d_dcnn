@@ -56,7 +56,7 @@ if __name__ =='__main__':
         elif conf.optimizer=='momentum':
             trainer =unet.Trainer(net,batch_size=1,optimizer="momentum",opt_kwargs=dict(momentum=0.99,learning_rate=conf.lr))
 
-        path=trainer.train(data_provider,conf.output_path,training_iters=17,epochs=1000,dropout=1,restore=True)
+        path=trainer.train(data_provider,conf.output_path,training_iters=100,epochs=500,dropout=1,restore=True)
 
     else:
         save_path = os.path.join(conf.output_path, "model.cpkt")
@@ -72,4 +72,4 @@ if __name__ =='__main__':
 
 
         #print("Prediction avg class: ",(prediction))
-        print("Testing avg class: ",(acc/Ntest))
+        print("Testing Accurancy: ",(acc/Ntest))

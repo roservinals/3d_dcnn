@@ -88,7 +88,7 @@ def create_conv_net(x, keep_prob, channels, n_class,reuse=None, layers=3, featur
 
     in_size = 1000
     size = in_size
-    print("initial size", in_node.get_shape())
+    #print("initial size", in_node.get_shape())
     # down layers
     with tf.variable_scope("convdown",reuse=reuse):
         for layer in range(0, layers):
@@ -128,7 +128,7 @@ def create_conv_net(x, keep_prob, channels, n_class,reuse=None, layers=3, featur
                         in_node= max_pool(dw_h_convs_r[layer], pool_size)
                         size /= 2
 
-                print("output size-conv down", in_node.get_shape())
+                #print("output size-conv down", in_node.get_shape())
 
 
         in_node = dw_h_convs_r[layers-1]
@@ -136,7 +136,7 @@ def create_conv_net(x, keep_prob, channels, n_class,reuse=None, layers=3, featur
 
     out_val = tf.layers.dense(output_map, 1)
 
-    print("output size-final", output_map.get_shape())
+    #print("output size-final", output_map.get_shape())
 
 
     #if summaries:
@@ -191,7 +191,7 @@ class Unet(object):
             output, _ = create_conv_net(self.x, self.keep_prob, channels, n_class,reuse=None, **kwargs)
     
             label = (self.y)
-            print(label)
+            #print(label)
             self.cost = self._get_cost(output,label, cost, cost_kwargs)
 
         #elif mode=="real_sp":
@@ -305,10 +305,9 @@ class Unet(object):
             # Restore model weights from previously saved model
             self.restore(sess, model_path)
             y_dummy = np.empty((1, self.n_class))#self.n_class
-            print(np.shape(x_test))
-            print(np.shape(y_dummy))
+            #print(np.shape(x_test))
+            #print(np.shape(y_dummy))
             prediction = sess.run(self.predicter, feed_dict={self.x: x_test, self.y: y_dummy, self.keep_prob: 1.})
-
             flat_logits = tf.reshape(prediction, [-1, self.n_class])
             out=sess.run(tf.nn.softmax(flat_logits))
         return out
@@ -479,10 +478,10 @@ class Trainer(object):
 
                     norm_gradients = [np.linalg.norm(gradient) for gradient in avg_gradients]
                     self.norm_gradients_node.assign(norm_gradients).eval()
-                    ################# PLOTS ################
+                    ### plot
                     if step % display_step == 0:
                         self.output_minibatch_stats(sess, summary_writer, step, batch_x, batch_y)
-                        self.output_minibatch_stats(sess, summary_writer, step, batch_x, util.crop_to_shape(batch_y, pred_shape))
+                      #  self.output_minibatch_stats(sess, summary_writer, step, batch_x, util.crop_to_shape(batch_y, pred_shape))
 
                     total_loss += loss
 
@@ -523,20 +522,19 @@ class Trainer(object):
                                                                       self.net.keep_prob: 0.})
         summary_writer.add_summary(summary_str, step)
         summary_writer.flush()
-        logging.info("Iter {:}, Minibatch Loss= {:.4f}, Training Accuracy= {:.4f}, Minibatch error= {:.1f}%".format(step,
-                                                                                                            loss,
-                                                                                                            acc,
-                                                                                                            error_rate(predictions, batch_y)))
+        # logging.info("Iter {:}, Minibatch Loss= {:.4f}, Training Accuracy= {:.4f}, Minibatch error= {:.1f}%".format(step,
+        #                                                                                                     loss,
+        #                                                                                                     acc,
+        #                                                                                                     error_rate(predictions, batch_y)))
 
 
 def error_rate(predictions, labels):
     """
     Return the error rate based on dense predictions and 1-hot labels.
     """
-
     return 100.0 - (
         100.0 *
-        np.sum(np.argmax(predictions, 3) == np.argmax(labels, 3)) /
+        np.sum(np.argmax(predictions) == np.argmax(labels)) /
         (predictions.shape[0]*predictions.shape[1]*predictions.shape[2]))
 
 
