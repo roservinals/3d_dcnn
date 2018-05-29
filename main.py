@@ -56,20 +56,102 @@ if __name__ =='__main__':
         elif conf.optimizer=='momentum':
             trainer =unet.Trainer(net,batch_size=1,optimizer="momentum",opt_kwargs=dict(momentum=0.99,learning_rate=conf.lr))
 
-        path=trainer.train(data_provider,conf.output_path,training_iters=100,epochs=500,dropout=1,restore=True)
+        path=trainer.train(data_provider,conf.output_path,training_iters=2,epochs=5,dropout=1,restore=True)
 
     else:
         save_path = os.path.join(conf.output_path, "model.cpkt")
         acc=0.0
         Ntest=364
+        identifiers=list()
+        x_t=list()
+        y_t=list()
+        pred=list()
         for i in np.arange(Ntest):
             print(repr(i)+"/"+repr(Ntest))
-            x_test, y_test = data_provider_test(1)
+            x_test, y_test, name = data_provider_test(1)
             prediction = net.predict(save_path, x_test)
-            print(prediction)
+            #print(prediction)
             tmp_flag=np.where(prediction==np.amax(prediction),1,0)
             acc += np.float(np.sum(tmp_flag*y_test))
-
-
+            
+            x_t.append(x_test)
+            y_t.append(y_test)
+            pred.append(prediction)
+            id=name.split("_")
+            id_str=id[1]
+            num_str=np.shape(id)
+            for j in range(2,num_str[0]-2):
+                id_str=id_str+'-'+id[j]
+            identifiers.append(id_str)
+        
         #print("Prediction avg class: ",(prediction))
-        print("Testing Accurancy: ",(acc/Ntest))
+        print("Testing Accurancy/patch: ",(acc/Ntest))
+
+        acc_patient1=0
+        scanned=list()
+        for i in np.arange(Ntest):
+            if i not in scanned:
+                str_i=identifiers[i]
+                indices = [j for j, x in enumerate(identifiers) if x == str_i]
+                pre=np.zeros((1,2))
+                for k in range(0,len(indices)):
+                    idx_k=indices[k]
+                    scanned.append(idx_k)
+                    pred_k=pred[idx_k]
+                    pre[0,0]=pred_k[0,0]+pre[0,0]
+                    pre[0,1]=pred_k[0,1]+pre[0,1]
+                    # if(len(indices)>1):
+                    #     print('###########'+str(i)+'/'+str(idx_k)+'###########')
+                    #     print('----------'+identifiers[idx_k]+'------------')
+                    #     print(indices)
+                    #     print(pred[idx_k])
+                    #     print(y_t[idx_k])
+                pre[0,0]=pre[0,0]/len(indices)
+                pre[0,1]=pre[0,1]/len(indices)   
+                tmp_flag=np.where(pre==np.amax(pre),1,0)
+                acc_patient1 += np.float(np.sum(tmp_flag*y_t[i]))
+        print("Testing Accurancy/patient1: ",(acc_patient1/len(scanned)))
+        acc_patient2=0
+        scanned=list()
+        for i in np.arange(Ntest):
+            if i not in scanned:
+                str_i=identifiers[i]
+                indices = [j for j, x in enumerate(identifiers) if x == str_i]
+                pre=np.zeros((1,2))
+                for k in range(0,len(indices)):
+                    idx_k=indices[k]
+                    scanned.append(idx_k)
+                    pred_k=pred[idx_k]
+                    pre[0,0]=pred_k[0,0]*pre[0,0]
+                    pre[0,1]=pred_k[0,1]*pre[0,1]
+                    # if(len(indices)>1):
+                    #     print('###########'+str(i)+'/'+str(idx_k)+'###########')
+                    #     print('----------'+identifiers[idx_k]+'------------')
+                    #     print(indices)
+                    #     print(pred[idx_k])
+                    #     print(y_t[idx_k])
+                tmp_flag=np.where(pre==np.amax(pre),1,0)
+                acc_patient2 += np.float(np.sum(tmp_flag*y_t[i]))
+        print("Testing Accurancy/patient2: ",(acc_patient2/len(scanned)))
+        acc_patient3=0
+        scanned=list()
+        for i in np.arange(Ntest):
+            if i not in scanned:
+                str_i=identifiers[i]
+                indices = [j for j, x in enumerate(identifiers) if x == str_i]
+                pre=np.zeros((1,2))
+                for k in range(0,len(indices)):
+                    idx_k=indices[k]
+                    scanned.append(idx_k)
+                    pred_k=pred[idx_k]
+                    pre[0,0]=max(pred_k[0,0],pre[0,0])
+                    pre[0,1]=max(pred_k[0,1],pre[0,1])
+                    # if(len(indices)>1):
+                    #     print('###########'+str(i)+'/'+str(idx_k)+'###########')
+                    #     print('----------'+identifiers[idx_k]+'------------')
+                    #     print(indices)
+                    #     print(pred[idx_k])
+                    #     print(y_t[idx_k])
+                tmp_flag=np.where(pre==np.amax(pre),1,0)
+                acc_patient3 += np.float(np.sum(tmp_flag*y_t[i]))
+        print("Testing Accurancy/patient3: ",(acc_patient3/len(scanned)))

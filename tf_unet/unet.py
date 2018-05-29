@@ -81,8 +81,8 @@ def create_conv_net(x, keep_prob, channels, n_class,reuse=None, layers=3, featur
     weights = []
     biases = []
     convs = []
-    #pools = OrderedDict()
-    #deconv = OrderedDict()
+    pools = OrderedDict()
+    deconv = OrderedDict()
     dw_h_convs_r = OrderedDict()
     #up_h_convs = OrderedDict()
 
@@ -139,22 +139,22 @@ def create_conv_net(x, keep_prob, channels, n_class,reuse=None, layers=3, featur
     #print("output size-final", output_map.get_shape())
 
 
-    #if summaries:
-    #for i, (c1, c2) in enumerate(convs):
-    #    tf.summary.image('summary_conv_%02d_01'%i, get_image_summary(c1))
-    #    tf.summary.image('summary_conv_%02d_02'%i, get_image_summary(c2))
+    if summaries:
+        for i, (c1, c2) in enumerate(convs):
+            tf.summary.image('summary_conv_%02d_01'%i, get_image_summary(c1))
+            tf.summary.image('summary_conv_%02d_02'%i, get_image_summary(c2))
 
-    #for k in pools.keys():
-    #    tf.summary.image('summary_pool_%02d'%k, get_image_summary(pools[k]))
+        for k in pools.keys():
+            tf.summary.image('summary_pool_%02d'%k, get_image_summary(pools[k]))
 
-    #for k in deconv.keys():
-    #    tf.summary.image('summary_deconv_concat_%02d'%k, get_image_summary(deconv[k]))
+        for k in deconv.keys():
+            tf.summary.image('summary_deconv_concat_%02d'%k, get_image_summary(deconv[k]))
 
-    #for k in dw_h_convs.keys():
-    #    tf.summary.histogram("dw_convolution_%02d"%k + '/activations', dw_h_convs[k])
+        # for k in dw_h_convs.keys():
+        #     tf.summary.histogram("dw_convolution_%02d"%k + '/activations', dw_h_convs[k])
 
-    #for k in up_h_convs.keys():
-    #    tf.summary.histogram("up_convolution_%s"%k + '/activations', up_h_convs[k])
+        # for k in up_h_convs.keys():
+        #     tf.summary.histogram("up_convolution_%s"%k + '/activations', up_h_convs[k])
 
     return out_val, int(in_size - size)
 
@@ -211,7 +211,8 @@ class Unet(object):
         self.gradients_node = tf.gradients(self.cost, self.variables)
         self.predicter = output
         self.correct_pred = tf.constant(0.0)#tf.equal(tf.argmax(self.predicter, 3), tf.argmax(self.y, 3))
-        self.accuracy = tf.constant(0.0)#tf.reduce_mean(tf.cast(self.correct_pred, tf.float32))
+        self.accuracy = tf.constant(0.0)
+        self.cross_entropy=tf.constant(0.0)#tf.reduce_mean(tf.cast(self.correct_pred, tf.float32))
 
     def _get_cost(self, logits,logits_label, cost_name, cost_kwargs):
         """
@@ -381,12 +382,13 @@ class Trainer(object):
         global_step = tf.Variable(0)
 
         self.norm_gradients_node = tf.Variable(tf.constant(0.0, shape=[len(self.net.gradients_node)]))
-
-        #if self.net.summaries:
-            #tf.summary.histogram('norm_grads', self.norm_gradients_node)
+    
+        if self.net.summaries:
+            tf.summary.histogram('norm_grads', self.norm_gradients_node)
 
         tf.summary.scalar('loss', self.net.cost)
-        #tf.summary.scalar('cross_entropy', self.net.cross_entropy)
+        
+        tf.summary.scalar('cross_entropy', self.net.cross_entropy)
         tf.summary.scalar('accuracy', self.net.accuracy)
 
         self.optimizer = self._get_optimizer(training_iters, global_step)
@@ -469,8 +471,7 @@ class Trainer(object):
                                    #self.net.Y:batch_y_fv,
                                    #self.net.cts:cts,
                                    self.net.keep_prob: 1.})
-                    #print("after sess run")
-
+                    #print(loss)
                     if avg_gradients is None:
                         avg_gradients = [np.zeros_like(gradient) for gradient in gradients]
                     for i in range(len(gradients)):

@@ -50,9 +50,8 @@ class BaseDataProvider(object):
         self.nb=0
 
     def _load_data_and_label(self):
-        data,label= self._next_data()
-
-        return data, label
+        data,label,name= self._next_data()
+        return data, label,name
 
         #real, imag, real_L, imag_L  = self._next_data()
 
@@ -81,7 +80,7 @@ class BaseDataProvider(object):
 
 
     def __call__(self, n):
-        data,label= self._load_data_and_label()
+        data,label,name= self._load_data_and_label()
         nc=data.shape[0]
         nxh=data.shape[1]
         nyh=data.shape[2]
@@ -106,8 +105,9 @@ class BaseDataProvider(object):
                 Xsp=Xsp[:,:,::-1,:,:]
             if np.random.rand(1)>0.5:
                 Xsp=Xsp[:,:,:,::-1,:]
-
-        return Xsp,Ysp.reshape((1,2))
+            return Xsp,Ysp.reshape((1,2))
+        else:
+            return Xsp,Ysp.reshape((1,2)),name
 
 class ImageDataProvider(BaseDataProvider):
     """
@@ -268,9 +268,9 @@ class ImageDataProvider_hdf5_vol(BaseDataProvider):
     def _next_data(self):
         self._cylce_file()
         image_name = self.data_files[self.ids[self.file_idx]]
-        #print("image_name",self.ids[self.file_idx])
+        #print("image_name",image_name)
         self.image_name=self.ids[self.file_idx]
 
         data= self._load_file(image_name, 'data')
         label = self._load_file(image_name, 'label')
-        return np.expand_dims(data,0),np.expand_dims(label,0)
+        return np.expand_dims(data,0),np.expand_dims(label,0),image_name
